@@ -1,11 +1,13 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse, HttpResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.backends import ModelBackend
-from .models import UserProfile
+from .models import UserProfile, Banner
 from django.db.models import Q
 from .forms import LoginForm, RegisterForm
 from django.views.generic import View
 from django.contrib.auth.hashers import make_password
+from utils.send_email import send_register_email
+
 
 # 登陆视图
 class CustomBackend(ModelBackend):
@@ -32,14 +34,16 @@ class RegisterView(View):
             user_name = request.POST.get('email', '')
             pass_word = request.POST.get('password', '')
             user_profile = UserProfile()
-            # user_profile.username = user_name
+            user_profile.username = user_name  # 这里的user_name是前端传过来的email
             user_profile.email = user_name
             # user_profile.set_password(pass_word)  # 保存密码
             user_profile.password = make_password(pass_word)  # 保存密码和上一行的操作意义一样
-            user_profile.save(force_insert=True)
-            return HttpResponse('successful')
-        else:
-            return render(request, 'index.html')
+            user_profile.save()  # 这个就很尴尬了，非要加上force_inser=True才能从前端提交保存到数据库
+            #但是我直接在后代文件中写save()就可以保存了，则会是为什么？？？
+            # 然后几天之后我直接调用save方法居然又能行了，这是真的尴尬了
+            send_register_email(user_name, 'register')
+        return render(request, "index.html")
+
 
 
 class LoginView(View):
@@ -57,5 +61,6 @@ class LoginView(View):
                 return render(request, "index.html")
         else:
             return render(request, "login.html", {'msg': '用户名或者密码错误！', 'login_form': form})
+
 
 

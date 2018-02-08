@@ -138,6 +138,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
 
     os.path.join(BASE_DIR, "static"),
-
 )
 
+#邮箱配置
+EMAIL_HOST = 'smtp.sina.com'  # 服务器
+EMAIL_PORT = 25  #　邮箱端口端口
+EMAIL_HOST_USER = '1400720231_mina@sina.com'  # 用户名字
+EMAIL_HOST_PASSWORD = "250onion"  #邮箱账号密码
+EMAIL_USE_TLS = False  # 一般就是False就可以了
+EMAIL_FROM = '1400720231_mina@sina.com'  # 发送者，一般和EMAIL_HOST_USER保持一直，不然会报错
