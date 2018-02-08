@@ -1,2 +1,1 @@
-# Django-Projects
-This is my project including my django web sites or some others about django.
+这将是我存储python爬虫的地方，主要是平时的各种爬虫脚本。
