@@ -1,6 +1,7 @@
 <form method="post" action="{% url 'register' %}">
         {% csrf_token %}
         {{ register_form.as_p }}
+        <p>{{ mes }}</p>
         <button name="submit" class="btn btn-primary">注册 </button>
         <input type="hidden" name="next" value="{% url 'index' %}" />
 </form>
