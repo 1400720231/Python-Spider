@@ -17,8 +17,11 @@ from django.conf.urls import url, include
 # from django.contrib import admin
 import xadmin
 from django.views.generic import TemplateView  # 专门处理静态文件的View
-from users.views import LoginView, RegisterView, ActiveUserView, ForgetPwdViws, ResetView, ModifyPwdView, LogoutView
+from django.views.static import serve  # 处理静态文件的
 
+from users.views import LoginView, RegisterView, ActiveUserView, ForgetPwdViws, ResetView, ModifyPwdView, LogoutView
+from organization.views import OrgView
+from MxOnline.settings import MEDIA_ROOT
 
 urlpatterns = [
     url(r'^xadmin/', xadmin.site.urls),
@@ -31,4 +34,8 @@ urlpatterns = [
     url(r'^forget/$', ForgetPwdViws.as_view(), name='forget_pwd'),
     url(r'^reset/(?P<active_code>.*)/$', ResetView.as_view(), name='reset_pwd'),  # 重置的get方法url
     url(r'^modify/$', ModifyPwdView.as_view(), name='modify_pwd'),
+    #  课程首页
+    url(r'^org_list/$', OrgView.as_view(), name='org_list'),
+    # 配置上传访问文件
+    url(r'^media/(?P<path>.*)/$', serve, {'document_root':MEDIA_ROOT})
 ]

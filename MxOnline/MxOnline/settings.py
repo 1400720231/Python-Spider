@@ -76,6 +76,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',  # 上下文处理器 把mdial_url自动注册到html中.django1.8以前在core中
             ],
         },
     },
@@ -134,9 +135,8 @@ USE_TZ = False  # True表示国际UTC时间，False表示本地时间
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/static/'  # 这个名字可以随便取
 STATICFILES_DIRS = (
-
     os.path.join(BASE_DIR, "static"),
 )
 
@@ -147,3 +147,7 @@ EMAIL_HOST_USER = '1400720231_mina@sina.com'  # 用户名字
 EMAIL_HOST_PASSWORD = "250onion????"  # 邮箱账号密码
 EMAIL_USE_TLS = False  # 一般就是False就可以了
 EMAIL_FROM = '1400720231_mina@sina.com'  # 发送者，一般和EMAIL_HOST_USER保持一直，不然会报错
+
+
+MEDIA_URL = '/media/'  # 类似于static的url，名字也是可以随便取的
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # media_root只能设置一个，不然她不知道到底存放再哪里
