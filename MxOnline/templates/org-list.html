@@ -20,13 +20,17 @@
 				<li>
 					<h2>机构类别</h2>
 					<div class="cont">
-                        <a href="?city="><span class="active2">全部</span></a>
+                        <a href="?city={{ city_id }}"><span class="{% ifequal category '' %}active2{% endifequal %}">全部</span></a>
+                            <!--如果传回来的值等于pxjg的话就class=active2，但是ct，和city的值筛选不能共存，
+                            筛选了ct后的数据会被筛选city的数据替换掉。
+                            所以就这样同时传入两个值：href="?ct=pxjg&city={{ city_id }}"，像这样传city筛选返回的city_id到view中，这样
+                            就可以达到数据被同时filter()的功能
+                            -->
+                            <a href="?ct=pxjg&city={{ city_id }}"><span class="{% ifequal category 'pxjg' %}active2{% endifequal %}">培训机构</span></a>
 
-                            <a href="?ct=pxjg&city="><span class="">培训机构</span></a>
+                            <a href="?ct=gx&city={{ city_id }}"><span class="{% ifequal category 'gx' %}active2{% endifequal %}">高校</span></a>
 
-                            <a href="?ct=gx&city="><span class="">高校</span></a>
-
-                            <a href="?ct=gr&city="><span class="">个人</span></a>
+                            <a href="?ct=gr&city={{ city_id }}"><span class="{% ifequal category 'gr' %}active2{% endifequal %}">个人</span></a>
 
 					</div>
 				</li>
@@ -34,9 +38,13 @@
 					<h2>所在地区</h2>
 					<div class="more">更多</div>
 					<div class="cont">
-                        <a href="?ct="><span class="active2">全部</span></a>
-                                {% for city in all_citys %}
-                                    <a href="?city=1&ct="><span class="">{{ city.name }}</span></a>
+                        <a href="?ct={{ category }}"><span class="{% ifequal city_id '' %}active2 {% endifequal %}">全部</span></a>
+                                <!--没有选择city的话就点亮全部-->
+                                {% for city in all_citys %}  <!--这里的city是一个CityDict queryset对像，city.id则是CityDict实例化的id, 对应CourseOeg的city_id值-->
+                                    <a href="?city={{ city.id }}&ct={{ category }}"><span class="{% ifequal city.id|stringformat:'i' city_id %} active2 {% endifequal %}">{{ city.name }}</span></a>
+                                <!--如果city.id=city_id就把选中的城市class=''active2 意思就是后台收到了city.id传进来的值，为了到达选中
+                                的效果，我再把一个值传回来让前端来判断，这种方法可以看作为了是实现前端的选中状态强行传值回来的，没毛病。
+                                city.id|stringformat:'i'的意思是用stringformat方法格式化前面的city.id把其转化成整形i-->
                                 {% endfor %}
 
 
@@ -50,13 +58,13 @@
 		<div class="layout">
 			<div class="head">
 				<ul class="tab_header">
-					<li class="active"><a href="?ct=&city=">全部</a> </li>
+					<li class="{% ifequal sort '' %}active{% endifequal %}"><a href="?ct={{ category }}&city={{ city_id }}">全部</a> </li>
 
-					<li class=""><a href="?sort=students&ct=&city=">学习人数 &#8595;</a></li>
-					<li class=""><a href="?sort=courses&ct=&city=">课程数 &#8595;</a></li>
+					<li class="{% ifequal sort 'students' %}active{% endifequal %}"><a href="?sort=students&ct={{ category }}&city={{ city_id }}">学习人数 &#8595;</a></li>
+					<li class="{% ifequal sort 'courses' %}active{% endifequal %}"><a href="?sort=courses&ct={{ category }}&city={{ city_id }}">课程数 &#8595;</a></li>
 				</ul>
 			</div>
-            {% for course_org in all_orgs %}
+            {% for course_org in all_orgs.object_list %}
                  <dl class="des difdes">
                     <dt>
                         <a href="org-detail-homepage.html">
@@ -91,38 +99,39 @@
                     <div class="buy start_groupbuy jsShowPerfect2" data-id="22"><br/>联系<br/>服务</div>
                 </dl>
             {% endfor %}
-
-
-
-
 		</div>
 		 <div class="pageturn">
             <ul class="pagelist">
+            <!--前一页逻辑-->
+                        {% if all_orgs.has_previous %}
+                            <li class="long"><a href="?{{ all_orgs.previous_page_number.querystring }}">上一页</a></li
+                        {% endif %}
+            <!--中间页逻辑-->
+                        {% for page in all_orgs.pages %}
+                            {% if page %}
+                                {% ifequal page all_orgs.number %}
+                                    <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                                        <!--如果是当前页就处于某种状态 class="active"-->
+                                {% else %}  <!--如果有不当前页就处于另一种状态  class="page"-->
+                                     <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                {% endifequal %}
+                            {% else %}
+                                ...
+                            {% endif %}
+                        {% endfor %}
+            <!--后一页逻辑-->
+                        {% if all_orgs.has_next %}
+                            <li class="long"><a href="?{{ all_orgs.next_page_number.querystring }}">下一页</a></li>
+
+                        {% endif %}
 
 
 
-
-
+    <!--
                             <li class="active"><a href="?page=1">1</a></li>
-
-
-
-
-
                             <li><a href="?page=2" class="page">2</a></li>
-
-
-
-
-
                             <li><a href="?page=3" class="page">3</a></li>
-
-
-
-
-                    <li class="long"><a href="?page=2">下一页</a></li>
-
-
+                            <li class="long"><a href="?page=2">下一页</a></li>  -->
             </ul>
         </div>
 		</div>
@@ -151,30 +160,18 @@
 		<div class="right companyrank layout">
 			<div class="head">授课机构排名</div>
 
+                    {% for current_org in hot_orgs %}
 
-                <dl class="des">
-                    <dt class="num fl">1</dt>
-                    <dd>
-                        <a href="/company/2/"><h1>慕课网</h1></a>
-                        <p>北京市</p>
-                    </dd>
-                </dl>
+                        <dl class="des">
+                            <dt class="num fl">{{ forloop.counter }}</dt>
+                            <dd>
+                                <a href="/company/2/"><h1>{{ current_org.name }}</h1></a>
+                                <p>{{ current_org.address }}</p>
+                            </dd>
+                        </dl>
+                    {% endfor %}
 
-                <dl class="des">
-                    <dt class="num fl">2</dt>
-                    <dd>
-                        <a href="/company/2/"><h1>慕课网2</h1></a>
-                        <p>深圳市</p>
-                    </dd>
-                </dl>
 
-                <dl class="des">
-                    <dt class="num fl">3</dt>
-                    <dd>
-                        <a href="/company/2/"><h1>北京大学</h1></a>
-                        <p>北京市</p>
-                    </dd>
-                </dl>
 
 
 

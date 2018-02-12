@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'operation',
     'xadmin',  # 没有智能提示，也没有报错。。。。
     'crispy_forms',
-    'captcha'
+    'captcha',
+    'pure_pagination',
 ]
 AUTH_USER_MODEL = "users.UserProfile"  # 默认user信息表是users下面的UserProfile表
 MIDDLEWARE = [
