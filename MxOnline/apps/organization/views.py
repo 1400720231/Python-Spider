@@ -1,9 +1,10 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import View
 from .models import CourseOrg, CityDict
 # Create your views here.
-
+from .forms import UserAskForm
 
 class OrgView(View):
     """课程机构列表功能 筛选功能等"""
@@ -52,3 +53,14 @@ class OrgView(View):
             'sort': sort
         }
         return render(request, 'org-list.html', context)
+
+
+class AddUserAskView(View):
+    def post(self, request):
+        userask_form = UserAskForm(request.POST)
+        if userask_form.is_valid():  # 是否合法
+            user_ask = userask_form.save(commit=True)  # commit属于ModelForm的方法
+            # 如果是commit= False的话 user_ask就是一个model对象
+            return HttpResponse("status: success")  # 声明json格式
+        else:
+            return HttpResponse("{'status': 'fail', 'msg':'添加出错'}")
