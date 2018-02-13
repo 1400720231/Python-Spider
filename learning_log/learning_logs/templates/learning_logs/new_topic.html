@@ -1,0 +1,13 @@
+{% extends "learning_logs/base.html" %}
+
+{% block content %}
+    <p>新建主题</p>
+
+    <form action="{% url 'learning_logs:new_topic' %}" method="post">
+        {% csrf_token %}  <!--防止攻击者跨站伪造请求，来验证是不是在一个网站上-->
+        {{ form.as_p }}<!--# 模板变量，可以然django自动显示所有字段，as_p修饰符 一段落的格式渲染所有的表格元素，显示好看，类似于回车-->
+
+    <button name="submit">提交</button>
+    </form>
+
+{% endblock content %}

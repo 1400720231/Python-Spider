@@ -1,0 +1,18 @@
+{% extends "learning_logs/base.html" %}
+
+{% block content %}
+    <p>Topics</p>
+    <ul>
+    {% for topic in topics %}
+        <li>
+            <!-- topic.id表示创建的顺序。打开数据表就会返发现第一列就是id列-->
+            <!--也就是/topic/n/  表示每个topic对应的地址，其实topic.id等价于topic_id 但是topic_id没有传进来而已-->
+        <a href="{% url 'learning_logs:topic' topic.id %}"> {{ topic }} </a>
+        </li>
+    {% empty %}
+        <li> 没有添加任何主题 </li>
+    {% endfor %}
+    </ul>
+
+    <a href="{% url 'learning_logs:new_topic' %}">新建主题</a>
+{% endblock content %}

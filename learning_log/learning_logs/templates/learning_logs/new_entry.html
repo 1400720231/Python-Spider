@@ -1,0 +1,16 @@
+{% extends "learning_logs/base.html" %}
+
+{% block content %}
+    <p> <a href="{% url 'learning_logs:topic' topic.id %}">{{ topic }}</a></p>
+    <p> 添加新条目</p>
+    <!--learning_lons是url中的namespace='learning_logs'的名字，
+        new_entry是app url配置中的name：name='new_entry'
+     -->
+    <form action="{% url 'learning_logs:new_entry' topic.id %}" method="post">
+
+    {% csrf_token %}    <!--防止跨站攻击-->
+    {{ form.as_p }}   <!-- # 所有的字段一换行符的形式来显示-->
+    <button name="submit">提交</button>
+
+    </form>
+{% endblock content %}
