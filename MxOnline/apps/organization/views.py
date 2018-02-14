@@ -5,6 +5,8 @@ from django.views.generic import View
 from .models import CourseOrg, CityDict
 # Create your views here.
 from .forms import UserAskForm
+#from courses.models import Course
+
 
 class OrgView(View):
     """课程机构列表功能 筛选功能等"""
@@ -64,3 +66,20 @@ class AddUserAskView(View):
             return HttpResponse("status: success")  # 声明json格式
         else:
             return HttpResponse("{'status': 'fail', 'msg':'添加出错'}")
+
+
+class OrgHomeView(View):
+    """
+    机构首页
+    """
+    def get(self, request, org_id):
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        # course_set表示反向取外键的值,也是queryset对象
+        all_course = course_org.course_set.all()[:3]
+        all_teacher = course_org.teacher_set.all()[:1]
+        context = {
+            'all_course': all_course,
+            'all_teacher': all_teacher,
+            'course_org': course_org
+        }
+        return render(request, 'org-detail-homepage.html', context)
