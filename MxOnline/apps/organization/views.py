@@ -73,6 +73,7 @@ class OrgHomeView(View):
     机构首页
     """
     def get(self, request, org_id):
+        current_page = 'home'
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
         all_course = course_org.course_set.all()[:3]
@@ -80,22 +81,68 @@ class OrgHomeView(View):
         context = {
             'all_course': all_course,
             'all_teacher': all_teacher,
-            'course_org': course_org
-        }
+            'course_org': course_org,
+            'current_page': current_page
+                    }
         return render(request, 'org-detail-homepage.html', context)
 
 
 class OrgCourseView(View):
     """
-    机构首页
+    课程首页
     """
     def get(self, request, org_id):
+        current_page = 'course'
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
         all_course = course_org.course_set.all()
 
         context = {
             'all_course': all_course,
-            'course_org': course_org
+            'course_org': course_org,
+            'current_page': current_page
         }
         return render(request, 'org-detail-course.html', context)
+
+
+class OrgDescView(View):
+    """
+    机构介绍页
+    """
+    def get(self, request, org_id):
+        current_page = 'desc'
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        # course_set表示反向取外键的值,也是queryset对象
+        all_course = course_org.course_set.all()
+
+        context = {
+
+            'course_org': course_org,
+            'current_page': current_page
+        }
+        return render(request, 'org-detail-desc.html', context)
+
+
+class OrgTeacherView(View):
+    """
+    教师介绍页
+    """
+    def get(self, request, org_id):
+        current_page = 'teacher'
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        # course_set表示反向取外键的值,也是queryset对象
+        all_teachers = course_org.teacher_set.all()
+
+        context = {
+            'all_teachers': all_teachers,
+            'course_org': course_org,
+            'current_page': current_page
+        }
+        return render(request, 'org-detail-teachers.html', context)
+
+class AddFavView(View):
+    """
+    课程收藏功能
+
+    """
+    def post(self, request):
