@@ -17,7 +17,7 @@ class OrgView(View):
         hot_orgs = all_orgs.order_by("-click_num")[0:3]
         # 城市
         all_citys = CityDict.objects.all()
-
+        # 下面的每次筛选就会重新复赋值给all_orgs，保证了all_orgs是满足筛选的
         # 筛选出城市
         city_id = request.GET.get('city', "")  # city的值来自于a标签：<a href="?city={{ city.id }}">
                                                # 传进来的是city.id是来自CotyDict queryset的实例创建id，数据库中的all_orgs的city_id是CityDict的外键，所以这种filter是对的
@@ -38,7 +38,7 @@ class OrgView(View):
         # 计数
         org_nums = all_orgs.count()
 
-        # 对机构分页
+        # 对机构分页,这里是第三方库pagenation的内置格式，只是换了一下数据字段
         try:
             page = request.GET.get('page', 1)  # 这个page字段是安装库后自己有的，不用管
         except PageNotAnInteger:
@@ -76,10 +76,26 @@ class OrgHomeView(View):
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
         all_course = course_org.course_set.all()[:3]
-        all_teacher = course_org.teacher_set.all()[:1]
+        all_teacher = course_org.teacher_set.all()[:1]  # 反向获取到teacher
         context = {
             'all_course': all_course,
             'all_teacher': all_teacher,
             'course_org': course_org
         }
         return render(request, 'org-detail-homepage.html', context)
+
+
+class OrgCourseView(View):
+    """
+    机构首页
+    """
+    def get(self, request, org_id):
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        # course_set表示反向取外键的值,也是queryset对象
+        all_course = course_org.course_set.all()
+
+        context = {
+            'all_course': all_course,
+            'course_org': course_org
+        }
+        return render(request, 'org-detail-course.html', context)

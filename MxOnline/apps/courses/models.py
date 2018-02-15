@@ -3,6 +3,7 @@ from django.db import models
 # Create your models here.
 from organization.models import CourseOrg
 
+
 class Course(models.Model):
     course_org = models.ForeignKey(CourseOrg, verbose_name='课程机构',null=True, blank=True)  # 因为已经有数据存在，所以允许为空
     name = models.CharField(max_length=50, verbose_name="课程名")

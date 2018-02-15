@@ -72,9 +72,13 @@
 <section>
 	<div class="wp list personal_list comp">
 		<div class="left">
-			<ul>
-				<li class="active2"><a href="org-detail-homepage.html">机构首页</a></li>
-                <li class=""><a href="org-detail-course.html">机构课程</a></li>
+			<ul>  <!--course_org.id在view中以course_org在org-detail-homepage.html中被调用，但是此时homepage继承的是org-base.html页面
+			        所以org-base.html由于向上传递的原因可以调用course_org，即可以调用course_org.id，也就是说在整个机构详情页前端页面course_org.id
+			        都是一样的，只有在org-list。html中的course_org.id变化的时候，后面的整个机构详情页中的course_org.id才随之变化
+
+			-->
+				<li class="active2"><a href="{% url 'org:org_home' course_org.id %}">机构首页</a></li>
+                <li class=""><a href="{% url 'org:org_course' course_org.id %}">机构课程</a></li>
                 <li class=""><a href="org-detail-desc.html">机构介绍</a></li>
                 <li class=""><a href="org-detail-teachers.html">机构讲师</a></li>
 			</ul>
