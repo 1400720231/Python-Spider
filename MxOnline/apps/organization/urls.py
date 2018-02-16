@@ -14,5 +14,6 @@ urlpatterns =[
     url(r'^desc/(?P<org_id>\d+)/$', OrgDescView.as_view(), name='org_desc'),
     url(r'^teacher/(?P<org_id>\d+)/$', OrgTeacherView.as_view(), name='teacher'),
     # 处理收藏功能的url
-    url(r'^add_ask/$', AddUserAskView.as_view(), name='add_ask'),
+    # url(r'^add_fav/(?P<fav_id>\d+)/(?P<fav_type>\d+)/$', AddFavView.as_view(), name='add_fav')
+
 ]

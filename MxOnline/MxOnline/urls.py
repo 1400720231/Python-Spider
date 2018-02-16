@@ -37,5 +37,5 @@ urlpatterns = [
 
     url(r'^org/', include('organization.urls', namespace='org')),
     # 配置上传访问文件
-    url(r'^media/(?P<path>.*)/$', serve, {'document_root':MEDIA_ROOT})
+    url(r'^media/(?P<path>.*)/$', serve, {'document_root': MEDIA_ROOT})
 ]

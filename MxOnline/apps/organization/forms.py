@@ -29,4 +29,4 @@ class UserAskForm(forms.ModelForm):
         else:
             raise forms.ValidationError('手机号非法', code="invalid mobile")
         # ValidationError()两个参数， 一个是message错误信息， 一个是自定义状态码,默认code=None
-        # 错误甩给了forms，所以调试的时候views中的forms.errors会包含这一点，
+        # 错误甩给了UserAskForm，所以调试的时候views中的forms.errors会包含这一点，
