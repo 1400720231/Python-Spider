@@ -20,15 +20,39 @@
     <header>
 		<div  class="header2 header">
 
-                <div class="top">
-				<div class="wp">
-					<div class="fl">
-                        <p>联系方式：<b>3333333333</b></p>
-                    </div>
-                    <a style="color:white" class="fr registerbtn" href="register.html">注册</a>
-                    <a style="color:white" class="fr loginbtn" href="login.html">登录</a>
+                {% if request.user.is_authenticated %}
+ 			<div class="top">
+                     <div class="wp">
+					    <div class="fl"><p>服务电话：<b>33333333</b></p></div>
+					    <!--登录后跳转-->
+
+						    <div class="personal">
+                              <dl class="user fr">
+                                <dd>{{ user.username }}<a href="{% url 'logout' %}">退出</a><img class="down fr" src="/static/images/top_down.png"/></dd>
+                                <dt><img width="20" height="20" src="../media/image/2016/12/default_big_14.png"/></dt>
+                              </dl>
+                             <div class="userdetail">
+                            	<dl>
+	                                <dt><img width="80" height="80" src="../media/image/2016/12/default_big_14.png"/></dt>
+	                                <dd>
+	                                    <h2>django</h2>
+	                                    <p>bobby</p>
+	                                </dd>
+                                </dl>
+                                <div class="btn">
+	                                <a class="personcenter fl" href="usercenter-info.html">进入个人中心</a>
+	                                <a class="fr" href="/logout/">退出</a>
+                                </div>
+                            </div>
+                             </div>
+                     </div>
 				</div>
-			</div>
+            {% else %}
+                        <div class="top">
+                             <a style="color:white" class="fr registerbtn" href="{% url 'register' %}">注册</a>
+                             <a style="color:white" class="fr loginbtn" href="{% url "login" %}">登录</a>
+                        </div>
+            {% endif %}
 
 
     <div class="middle companyheader">
@@ -51,11 +75,8 @@
             </div>
             <div class="btn fr collectionbtn  notlogin
                  "data-favid="22" data-fav-type="1">
-           <!-- course = 1 表示收藏的课程
-            teacher = 0  表示收藏的教师
-            org = 0  表示收藏的机构  num1=course_org.id num2=fav_type-->
 
-                 <a href="#">收藏<a/>
+                 {% if has_fav %}已收藏{% else %}收藏{% endif %}
 
             </div>
 
@@ -214,12 +235,12 @@ function add_fav(current_elem, fav_id, fav_type){
         data:{'fav_id':fav_id, 'fav_type':fav_type},
         async: true,
         beforeSend:function(xhr, settings){
-            xhr.setRequestHeader("X-CSRFToken", "5I2SlleZJOMUX9QbwYLUIAOshdrdpRcy");
-        },
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");  <!--ajax采用这种方式完成前端页面的csrf请求-->
+        },  <!--收藏功能没有form所以前端没有csrf——token，在这里引用-->
         success: function(data) {
             if(data.status == 'fail'){
                 if(data.msg == '用户未登录'){
-                    window.location.href="login.html";
+                    window.location.href="/login/";  <!--未登录重定向到登录页面-->
                 }else{
                     alert(data.msg)
                 }
@@ -232,7 +253,7 @@ function add_fav(current_elem, fav_id, fav_type){
 }
 
 $('.collectionbtn').on('click', function(){
-    add_fav($(this), 1, 2);
+    add_fav($(this), {{ course_org.id }}, 2);  <!--course_org.id表示数据id。2表示数据类型-->
 });
 
 $(function(){
@@ -243,7 +264,7 @@ $(function(){
                     path		: '{% static 'images/' %}',
                     precision	: true,
                     size		: 24,
-                    starOff		: 'g_star.png'
+                    starOff		: 'g_star.png',
                     starOn		: 'r_star.png',
                     starHalf	: 'h_star.png',
                     hints       : ['极差', '差', '一般', '好评', '非常满意'],

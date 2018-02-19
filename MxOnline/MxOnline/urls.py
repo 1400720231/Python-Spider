@@ -34,8 +34,10 @@ urlpatterns = [
     url(r'^forget/$', ForgetPwdViws.as_view(), name='forget_pwd'),
     url(r'^reset/(?P<active_code>.*)/$', ResetView.as_view(), name='reset_pwd'),  # 重置的get方法url
     url(r'^modify/$', ModifyPwdView.as_view(), name='modify_pwd'),
-
+    # 机构课程url配置
     url(r'^org/', include('organization.urls', namespace='org')),
+    # 课程相关url配置
+    url(r'^course/', include('courses.urls', namespace='course')),
     # 配置上传访问文件
     url(r'^media/(?P<path>.*)/$', serve, {'document_root': MEDIA_ROOT})
 ]

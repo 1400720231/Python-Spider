@@ -16,10 +16,20 @@ class Course(models.Model):
     image = models.ImageField(upload_to="courses/%Y/%m", verbose_name="封面图", max_length=100)
     click_num = models.IntegerField(default=0, verbose_name="点击数")
     add_time = models.DateTimeField(auto_now_add=True, verbose_name="添加时间")
+    category = models.CharField(verbose_name="课程类别",  max_length=20, default='后端开发')
 
     class Meta:
         verbose_name = "课程"
         verbose_name_plural = verbose_name
+
+    def get_zj_nums(self):
+        # 获取章节课程数
+        # 因为lesson外键指向了Course，所以用lesson_set反向获取所有的lesson(章节数)
+        return self.lesson_set.all().count()
+
+    def get_learn_users(self):
+        # 获取学习了该课程的用户
+        return self.usercourse_set.all()[:5] # 取5个
 
     def __str__(self):
         return self.name
@@ -48,7 +58,7 @@ class Video(models.Model):
 class CourseResource(models.Model):
     course = models.ForeignKey(Course, verbose_name="课程")
     name = models.CharField(max_length=100, verbose_name="名称")
-    download  = models.FileField(upload_to="xourse/resource/%Y/%m", verbose_name="资源文件")
+    download  = models.FileField(upload_to="course/resource/%Y/%m", verbose_name="资源文件")
     add_time= models.DateTimeField(auto_now_add=True, verbose_name="添加时间")
 
     class Meta:

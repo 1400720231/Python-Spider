@@ -76,15 +76,19 @@ class OrgHomeView(View):
         current_page = 'home'
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
+        has_fav = False  # 判断是否收藏
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user, fav_type=2, fav_id=course_org.id):
+                has_fav = True
         all_course = course_org.course_set.all()[:3]
         all_teacher = course_org.teacher_set.all()[:1]  # 反向获取到teacher
-        fav_type = 0  # 收藏功能的收藏类型
+
         context = {
             'all_course': all_course,
             'all_teacher': all_teacher,
             'course_org': course_org,
             'current_page': current_page,
-            'fav_type': fav_type
+            'has_fav': has_fav
                     }
         return render(request, 'org-detail-homepage.html', context)
 
@@ -98,17 +102,22 @@ class OrgCourseView(View):
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
         all_course = course_org.course_set.all()
+        has_fav = False  # 判断是否收藏
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user, fav_type=2, fav_id=course_org.id):
+                has_fav = True
         """
         course teacher org是未了告诉前端页面刺客访问的是那教师，机构还是课程，为了收藏功能中的fav_type准备的
         并没有采用js实现，打算就用django后台逻辑实现
         """
-        fav_type = 1
+
 
         context = {
             'all_course': all_course,
             'course_org': course_org,
             'current_page': current_page,
-            'fav_type': fav_type
+            'has_fav': has_fav
+
         }
         return render(request, 'org-detail-course.html', context)
 
@@ -122,12 +131,16 @@ class OrgDescView(View):
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
         # all_course = course_org.course_set.all()
-        fav_type = 2
+        has_fav = False  # 判断是否收藏
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user, fav_type=2, fav_id=course_org.id):
+                has_fav = True
         context = {
 
             'course_org': course_org,
             'current_page': current_page,
-            'fav_type': fav_type
+            'has_fav': has_fav
+
 
         }
         return render(request, 'org-detail-desc.html', context)
@@ -142,47 +155,50 @@ class OrgTeacherView(View):
         course_org = CourseOrg.objects.get(id=int(org_id))
         # course_set表示反向取外键的值,也是queryset对象
         all_teachers = course_org.teacher_set.all()
-        fav_type = 3
+        has_fav = False
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user, fav_type=2, fav_id=course_org.id):
+                has_fav = True
         context = {
             'all_teachers': all_teachers,
             'course_org': course_org,
             'current_page': current_page,
-            'fav_type': fav_type
+            'has_fav':has_fav
+
 
         }
         return render(request, 'org-detail-teachers.html', context)
 
 
+class AddFavView(View):
+    """
+        用户收藏，用户取消收藏, 这个功能是应ajax实现的
+    """
+    def post(self, request):
 
-#
-# class AddFavView(View):
-#     """
-#         用户收藏，用户取消收藏
-#     """
-#     def get(self, request, fav_id, fav_type):
-#
-#         # # has_fav = False
-#         # fav_id = request.POST.get('fav_id', 0)
-#         # fav_type = request.POST.get('fav_type', 0)
-#         # 判断是否登录， return后面就不执行了，在这里结束了
-#         if not request.user.is_authenticated():
-#             return HttpResponseRedirect(reverse('login'))
-#         # 用户登录后逻辑
-#         exist_records = UserFavorite.objects.filter(user=request.user, fav_type=int(fav_type), fav_id=int(fav_id))
-#         if exist_records:
-#             # 记录已经存在， 则表示用户取消收藏
-#             exist_records.delete()
-#             has_fav = False  # 根据传回的值，判断是未收藏还是已收藏
-#             return render(request, 'org_base.html', {'has-fav': has_fav})
-#         else:
-#             user_fav = UserFavorite()
-#             if int(fav_id) >0 and int(fav_type) > 0:
-#                 user_fav.user = request.user
-#                 user_fav.fav_id = int(fav_id)
-#                 user_fav.fav_type = int(fav_type)
-#                 user_fav.save()
-#                 has_fav = True  # 根据传回的值，判断是未收藏还是已收藏
-#                 return render(request, 'org_base.html', {'has-fav': has_fav})
-#             else:
-#                 return HttpResponse('收藏出错')
-#
+        # # has_fav = False
+        fav_id = request.POST.get('fav_id', 0)
+        fav_type = request.POST.get('fav_type', 0)
+        # 判断是否登录， return后面就不执行了，在这里结束了
+        # 未登录状态下依然会有user类在里面
+        if not request.user.is_authenticated():
+            return HttpResponse('{"status":"fail", "msg":"用户未登录"}', content_type="application/json")
+        # 用户登录后逻辑
+        exist_records = UserFavorite.objects.filter(user=request.user, fav_type=int(fav_type), fav_id=int(fav_id))
+        if exist_records:
+            # 记录已经存在， 则表示用户取消收藏
+            exist_records.delete()
+            return HttpResponse('{"status":"success", "msg":"收藏"}', content_type="application/json")
+        else:  #　如果不存在
+            user_fav = UserFavorite()
+            if int(fav_id) >0 and int(fav_type) >0:
+                user_fav.user = request.user
+                user_fav.fav_id = int(fav_id)
+                user_fav.fav_type = int(fav_type)
+                user_fav.save()
+                has_fav = True  # 根据传回的值，判断是未收藏还是已收藏
+                return HttpResponse('{"status":"success", "msg":"已收藏"}', content_type="application/json")
+
+            else:
+                return HttpResponse('{"status":"fail", "msg":"收藏出错"}', content_type="application/json")
+

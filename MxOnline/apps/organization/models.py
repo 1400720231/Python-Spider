@@ -38,6 +38,10 @@ class CourseOrg(models.Model):
     def __str__(self):
         return self.name
 
+    def get_teacher_nums(self):
+        # 获取课程机构教师数量
+        return self.teacher_set.all().count()
+
 
 class Teacher(models.Model):
     org = models.ForeignKey(CourseOrg, verbose_name="所属机构")
