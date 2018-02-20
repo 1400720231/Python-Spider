@@ -40,8 +40,13 @@ class CourseDetailView(View):
         course = Course.objects.get(id=int(course_id))
         course.click_num += 1
         course.save()
-
+        tag = course.tag
+        if tag:
+            relate_courses = Course.objects.filter(tag=tag)[:2]
+        else:
+            relate_courses = []
         context = {
-            'course': course
+            'course': course,
+            'relate_courses': relate_courses
         }
         return render(request, 'course-detail.html', context)

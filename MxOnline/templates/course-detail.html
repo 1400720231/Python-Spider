@@ -129,19 +129,19 @@
 			<div class="right layout">
 				<div class="head">相关课程推荐</div>
                 <div class="group_recommend">
-
+{% for relate_course in relate_courses %}
                         <dl>
                             <dt>
                                 <a target="_blank" href="">
-                                    <img width="240" height="220" class="scrollLoading" src="../media/courses/2016/11/540e57300001d6d906000338-240-135_mvvGYHL.jpg"/>
+                                    <img width="240" height="220" class="scrollLoading" src="{{ MEDIA_URL }}{{ relate_course.image }}"/>
                                 </a>
                             </dt>
                             <dd>
-                                <a target="_blank" href=""><h2> django实战项目</h2></a>
-                                <span class="fl">学习时长：<i class="key">0</i></span>
+                                <a target="_blank" href=""><h2> {{ relate_course.name }}</h2></a>
+                                <span class="fl">学习时长：<i class="key">{{ relate_course.learn_times }}</i></span>
                             </dd>
                         </dl>
-
+{% endfor %}
 
 
                 </div>
@@ -151,4 +151,37 @@
 </section>
 
 {% endblock %}
+{% block custom_js %}
+<script type="text/javascript">
 
+function add_fav(current_elem, fav_id, fav_type){
+    $.ajax({
+        cache: false,
+        type: "POST",
+        url:"/org/add_fav/",
+        data:{'fav_id':fav_id, 'fav_type':fav_type},
+        async: true,
+        beforeSend:function(xhr, settings){
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");  <!--ajax采用这种方式完成前端页面的csrf请求-->
+        },  <!--收藏功能没有form所以前端没有csrf——token，在这里引用-->
+        success: function(data) {
+            if(data.status == 'fail'){
+                if(data.msg == '用户未登录'){
+                    window.location.href="/login/";  <!--未登录重定向到登录页面-->
+                }else{
+                    alert(data.msg)
+                }
+
+            }else if(data.status == 'success'){
+                current_elem.text(data.msg)
+            }
+        },
+    });
+}
+
+$('.collectionbtn').on('click', function(){
+    add_fav($(this), {{ course.id }}, 1);  <!--course.id表示数据id。2表示数据类型-->
+});
+
+</script>
+{% endblock %}
