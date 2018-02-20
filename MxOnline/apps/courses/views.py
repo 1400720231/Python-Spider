@@ -50,3 +50,16 @@ class CourseDetailView(View):
             'relate_courses': relate_courses
         }
         return render(request, 'course-detail.html', context)
+
+
+class CourseInfoView(View):
+    """
+    课程章节信息
+    """
+
+    def get(self, request, course_id):
+        course = Course.objects.get(id=int(course_id))
+        context = {
+            'course':course
+        }
+        return render(request, "course-video.html", context)

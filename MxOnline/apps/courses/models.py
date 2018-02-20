@@ -23,6 +23,10 @@ class Course(models.Model):
         verbose_name = "课程"
         verbose_name_plural = verbose_name
 
+    def get_course_lesson(self):
+        # 获取课程章节，是以地址链接的形式保存的并不是视频文件
+        return self.lesson_set.all()
+
     def get_zj_nums(self):
         # 获取章节课程数
         # 因为lesson外键指向了Course，所以用lesson_set反向获取所有的lesson(章节数)
@@ -31,6 +35,7 @@ class Course(models.Model):
     def get_learn_users(self):
         # 获取学习了该课程的用户
         return self.usercourse_set.all()[:5] # 取5个
+
 
     def __str__(self):
         return self.name
@@ -45,15 +50,29 @@ class Lesson(models.Model):
         verbose_name = "章节"
         verbose_name_plural = verbose_name
 
+    def __str__(self):
+        return self.name
+
+    def get_lesson_video(self):
+        # 获取章节视频文件
+        return self.video_set.all()
+
 
 class Video(models.Model):
+
     lesson = models.ForeignKey(Lesson, verbose_name="章节")
     name = models.CharField(max_length=100, verbose_name="视频名")
     add_time = models.DateTimeField(auto_now_add=True)
+    url = models.CharField(max_length=200, verbose_name="访问地址", default='')
+    # 也可以用models.URLField，但是就传入的数据必须是url格式
+    learn_times = models.IntegerField(default=0, verbose_name="学习时长(分钟数)")
 
     class Meta:
         verbose_name ="视频"
         verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
 
 
 class CourseResource(models.Model):
