@@ -2,7 +2,7 @@ from django.shortcuts import render, reverse
 from django.views.generic.base import View
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 # Create your views here.
-from .models import Course
+from .models import Course, CourseResource
 
 
 class CourseListView(View):
@@ -59,7 +59,9 @@ class CourseInfoView(View):
 
     def get(self, request, course_id):
         course = Course.objects.get(id=int(course_id))
+        all_resource = CourseResource.objects.filter(course=course)  # 用get的话只能获得一个资源文件，filter筛选所有满足的资源文件
         context = {
-            'course':course
+            'course':course,
+            'all_resource': all_resource
         }
         return render(request, "course-video.html", context)

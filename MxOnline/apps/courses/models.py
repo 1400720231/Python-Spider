@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-from organization.models import CourseOrg
+from organization.models import CourseOrg, Teacher
 
 
 class Course(models.Model):
@@ -9,6 +9,7 @@ class Course(models.Model):
     name = models.CharField(max_length=50, verbose_name="课程名")
     desc = models.CharField(max_length=300, verbose_name="课程描述")
     detail = models.TextField(verbose_name="课程详情")
+    teacher = models.ForeignKey(Teacher, verbose_name='讲师', null=True, blank=True)
     degree = models.CharField(verbose_name="难度", choices=(("cj", "初级"), ("zj", "中级"), ("gj", "高级")), max_length=2)
     learn_times = models.IntegerField(default=0,verbose_name="学习时长(分钟数)")
     students = models.IntegerField(default=0, verbose_name="学习人数")
@@ -18,6 +19,8 @@ class Course(models.Model):
     add_time = models.DateTimeField(auto_now_add=True, verbose_name="添加时间")
     category = models.CharField(verbose_name="课程类别",  max_length=20, default='后端开发')
     tag = models.CharField(verbose_name="课程标签",  max_length=20, default='')
+    you_need_know = models.CharField(max_length=200, default='', verbose_name='课程须知')
+    teacher_tell = models.CharField(max_length=200, default='', verbose_name='老师告诉你什么')
 
     class Meta:
         verbose_name = "课程"
@@ -84,3 +87,6 @@ class CourseResource(models.Model):
     class Meta:
         verbose_name = "课程资源"
         verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
