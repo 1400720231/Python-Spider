@@ -3,7 +3,7 @@ from django.views.generic.base import View
 from django.http import HttpResponse
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 # Create your views here.
-from .models import Course, CourseResource
+from .models import Course, CourseResource, Video
 from operation.models import UserFavorite, CourseComments, UserCourse
 from utils.mini_utils import LoginRequireMixin
 
@@ -33,6 +33,40 @@ class CourseListView(View):
             'hot_course': hot_course
         }
         return render(request, 'course-list.html', context)
+
+
+class VideoPlayView(View):
+    """
+    视频播放页视图函数
+
+    """
+    def get(self, request, video_id):
+        video = Video.objects.get(id=int(video_id))
+        course = video.lesson.course  # lesson是Video表中的字段，且外键指向Course表,course收Course中的字段
+        # 查询是否已经关联该课程，就是看usercourse表里面有没有
+        user_courses = UserCourse.objects.filter(user=request.user, course=course)
+        # 为空则没有关联， 强行关联save()一下
+        if not user_courses:
+            user_course = UserCourse(user=request.user, course=course)
+            user_course.save()
+        all_resource = CourseResource.objects.filter(course=course)  # 用get的话只能获得一个资源文件，filter筛选所有满足的资源文件
+        # 筛选出所有学过该课程的queryset对象
+        user_courses = UserCourse.objects.filter(course=course)
+        # 列表推导获取所有user_id
+        user_ids = [user_course.user.id for user_course in user_courses]
+        # 所有课程 user_id__in(双下划线) 表示user_id  in 意思是只要user_id在后面的list里面就可以了
+        all_user_course = UserCourse.objects.filter(user_id__in=user_ids)
+        # 所有课程id
+        course_ids = [user_course.course.id for user_course in all_user_course]
+        # 获取学过的相关课程
+        relate_courses = Course.objects.filter(id__in=course_ids).order_by("-click_num")[:4]
+        context = {
+            'course': course,
+            'all_resource': all_resource,
+            'relate_courses': relate_courses,
+            'video': video
+        }
+        return render(request, "course-play.html", context)
 
 
 class CourseDetailView(View):

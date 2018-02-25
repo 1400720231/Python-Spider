@@ -37,8 +37,7 @@ class Course(models.Model):
 
     def get_learn_users(self):
         # 获取学习了该课程的用户
-        return self.usercourse_set.all()[:5] # 取5个
-
+        return self.usercourse_set.all()[:5]  # 取5个
 
     def __str__(self):
         return self.name
@@ -71,7 +70,7 @@ class Video(models.Model):
     learn_times = models.IntegerField(default=0, verbose_name="学习时长(分钟数)")
 
     class Meta:
-        verbose_name ="视频"
+        verbose_name = "视频"
         verbose_name_plural = verbose_name
 
     def __str__(self):
