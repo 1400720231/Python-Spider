@@ -8,6 +8,7 @@ from .forms import UserAskForm
 from operation.models import UserFavorite
 from courses.models import Course
 
+
 class OrgView(View):
     """课程机构列表功能 筛选功能等"""
     def get(self, request):
@@ -110,7 +111,6 @@ class OrgCourseView(View):
         course teacher org是未了告诉前端页面刺客访问的是那教师，机构还是课程，为了收藏功能中的fav_type准备的
         并没有采用js实现，打算就用django后台逻辑实现
         """
-
 
         context = {
             'all_course': all_course,
