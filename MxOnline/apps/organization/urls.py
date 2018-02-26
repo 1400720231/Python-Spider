@@ -3,7 +3,7 @@
 from django.conf.urls import url, include
 
 from .views import OrgView, AddUserAskView, OrgHomeView, OrgCourseView, OrgDescView, OrgTeacherView, AddFavView
-
+from .views import TeacherListView, TeacherDetailView
 urlpatterns =[
     # 课程机构列表页
     url(r'^list/$', OrgView.as_view(), name='org_list'),
@@ -14,6 +14,8 @@ urlpatterns =[
     url(r'^desc/(?P<org_id>\d+)/$', OrgDescView.as_view(), name='org_desc'),
     url(r'^teacher/(?P<org_id>\d+)/$', OrgTeacherView.as_view(), name='teacher'),
     # 处理收藏功能的url 前端的ajax页面中的csrf_token失效未解决。。。
-    url(r'^add_fav/$', AddFavView.as_view(), name='add_fav')
-
+    url(r'^add_fav/$', AddFavView.as_view(), name='add_fav'),
+    # 教师列表页面
+    url(r'^teacher/list/$', TeacherListView.as_view(), name='teacher_list'),
+    url(r'^teacher/detail/(?P<teacher_id>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail')
 ]

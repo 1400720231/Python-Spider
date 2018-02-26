@@ -2,11 +2,11 @@ from django.shortcuts import render, reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import View
-from .models import CourseOrg, CityDict
+from .models import CourseOrg, CityDict, Teacher
 # Create your views here.
 from .forms import UserAskForm
 from operation.models import UserFavorite
-
+from courses.models import Course
 
 class OrgView(View):
     """课程机构列表功能 筛选功能等"""
@@ -202,3 +202,47 @@ class AddFavView(View):
             else:
                 return HttpResponse('{"status":"fail", "msg":"收藏出错"}', content_type="application/json")
 
+
+class TeacherListView(View):
+    """课程教师列表页面"""
+    def get(self, request):
+        all_teachers = Teacher.objects.all()
+        sort = request.GET.get('sort', "")
+        if sort:
+            if sort == 'students':
+                all_teachers = all_teachers.order_by("-click_num")
+        sorted_teacher = Teacher.objects.all().order_by("-click_num")[:3]
+
+        try:
+            page = request.GET.get('page', 1)  # 这个page字段是安装库后自己有的，不用管
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(all_teachers, 1, request=request)  # 教程文档中没有3这个参数，其实个参数在源码中是per_page,这个参数表示每页显示几个的意思
+        teachers = p.page(page)
+        context = {
+            'all_teachers': teachers,
+            'sorted_teacher':sorted_teacher,
+            'sort': sort
+
+        }
+        return render(request, 'teachers-list.html', context)
+
+
+class TeacherDetailView(View):
+    """
+    讲师的的详情页，和机构教师详情页是不一样的两个功能页面
+    """
+    def get(self, request, teacher_id):
+        # 讲师
+        teacher = Teacher.objects.get(id=int(teacher_id))
+        # 讲师的课程。通过course表filter出来
+        all_courses = Course.objects.filter(teacher=teacher)
+        # 热门讲师通过点击数来order_by
+        sorted_teacher = Teacher.objects.all().order_by("-click_num")[:3]
+
+        context = {
+            'teacher': teacher,
+            'all_courses': all_courses,
+            'sorted_teacher': sorted_teacher
+        }
+        return render(request, 'teacher-detail.html', context)
