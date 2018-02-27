@@ -2,6 +2,7 @@ from django.shortcuts import render, reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import View
+from django.db.models import Q
 from .models import CourseOrg, CityDict, Teacher
 # Create your views here.
 from .forms import UserAskForm
@@ -10,7 +11,7 @@ from courses.models import Course
 
 
 class OrgView(View):
-    """课程机构列表功能 筛选功能等"""
+    """课程机构列表功能 筛选功能等 所有机构页面"""
     def get(self, request):
         # 课程机构
         all_orgs = CourseOrg.objects.all()
@@ -18,6 +19,14 @@ class OrgView(View):
         hot_orgs = all_orgs.order_by("-click_num")[0:3]
         # 城市
         all_citys = CityDict.objects.all()
+
+        # 全局搜索功能 关键词语： icontains 如同sql中的like语句 i表示不区分大小写
+        search_keywords = request.GET.get('keywords', "")  # 取不到默认为空
+        if search_keywords:  # Q函数相当于or 的意思 要么name以keywors开头，要么desc 以keywords开头
+            all_orgs = all_orgs.filter(
+                Q(name__icontains=search_keywords) | Q(
+                    desc__icontains=search_keywords))
+
         # 下面的每次筛选就会重新复赋值给all_orgs，保证了all_orgs是满足筛选的
         # 筛选出城市
         city_id = request.GET.get('city', "")  # city的值来自于a标签：<a href="?city={{ city.id }}">
@@ -208,6 +217,14 @@ class TeacherListView(View):
     def get(self, request):
         all_teachers = Teacher.objects.all()
         sort = request.GET.get('sort', "")
+        # 全局搜索功能 关键词语： icontains 如同sql中的like语句 i表示不区分大小写
+        search_keywords = request.GET.get('keywords', "")  # 取不到默认为空
+        if search_keywords:  # Q函数相当于or 的意思 要么name以keywors开头，要么desc 以keywords开头
+            all_teachers = all_teachers.filter(
+                Q(name__icontains=search_keywords) |
+                Q( work_company__icontains=search_keywords)|
+                Q(work_position__icontains=search_keywords))
+
         if sort:
             if sort == 'students':
                 all_teachers = all_teachers.order_by("-click_num")

@@ -1,5 +1,6 @@
 from django.shortcuts import render, reverse
 from django.views.generic.base import View
+from django.db.models import Q
 from django.http import HttpResponse
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 # Create your views here.
@@ -7,11 +8,19 @@ from .models import Course, CourseResource, Video
 from operation.models import UserFavorite, CourseComments, UserCourse
 from utils.mini_utils import LoginRequireMixin
 
+
 class CourseListView(View):
     def get(self, request):
         all_courses = Course.objects.all().order_by('-add_time')  # 按照时间添加的逆序排序，降序，即最新顺序
 
         hot_course = Course.objects.all().order_by('-click_num')[:3]
+
+        # 全局搜索功能 关键词语： icontains 如同sql中的like语句 i表示不区分大小写
+        search_keywords = request.GET.get('keywords', "")  # 取不到默认为空
+        if search_keywords:    # Q函数相当于or 的意思 要么name以keywors开头，要么desc，要么detail以keywords开头
+            all_courses = all_courses.filter(Q(name__icontains=search_keywords)|Q(detail__icontains=search_keywords)|Q(desc__icontains=search_keywords))
+
+
         # 课程排序
         sort = request.GET.get('sort', "")  # 找不到就为空''
         if sort == 'students':

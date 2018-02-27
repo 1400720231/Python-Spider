@@ -59,13 +59,20 @@ function getCookie(name) {
  };
 
 //顶部搜索栏搜索方法
+//   <ul class="selectMenu" id="jsSelectMenu">
+//   <li data-value="course">公开课</li>
+//   <li data-value="org">课程机构</li>
+//   <li data-value="teacher">授课老师</li>
+//   </ul>
 function search_click(){
-    var type = $('#jsSelectOption').attr('data-value'),
-        keywords = $('#search_keywords').val(),
-        request_url = '';
+    var type = $('#jsSelectOption').attr('data-value'),  // 取出访问的地址是course还是org还是teacher
+        keywords = $('#search_keywords').val(),  //取出搜索关键词
+        request_url = '';  // 跳转url
+    //如果为空 什么都不做
     if(keywords == ""){
         return
     }
+    // 如果访问的是course 则把request_url组合成course/list?keywords=xxx的链接并跳转到此页面
     if(type == "course"){
         request_url = "/course/list?keywords="+keywords
     }else if(type == "teacher"){
