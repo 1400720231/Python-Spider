@@ -7,7 +7,7 @@ from .forms import LoginForm, RegisterForm, ForgetForm, ModifyPwdForm
 from django.views.generic import View
 from django.contrib.auth.hashers import make_password
 from utils.send_email import send_register_email
-
+from utils.mini_utils import LoginRequireMixin
 
 # 登陆视图
 class CustomBackend(ModelBackend):
@@ -97,7 +97,7 @@ class ForgetPwdViws(View):
         forget_form = ForgetForm()
         return render(request, 'forgetpwd.html', {'forget_form': forget_form})
 
-    def post(self,request):
+    def post(self, request):
         forget_form = ForgetForm(request.POST)
         if forget_form.is_valid():
             email = request.POST.get("email", '')  # 获取前端穿过来的email值
@@ -135,3 +135,11 @@ class ModifyPwdView(View):
         else:
             email = request.POST.get('email', '')
             return render(request, 'password_reset.html', {'e mail': email, 'modify_form': modify_form})
+
+
+class UserInfoView(LoginRequireMixin,View):
+    """
+    用户个人信息
+    """
+    def get(self, request):
+        return render(request, 'usercenter-info.html')
