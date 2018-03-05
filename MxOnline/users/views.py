@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from .models import UserProfile, EmailVerifyRecord
 from django.db.models import Q
-from .forms import LoginForm, RegisterForm, ForgetForm, ModifyPwdForm
+from .forms import LoginForm, RegisterForm, ForgetForm, ModifyPwdForm, UploadImageForm
 from django.views.generic import View
 from django.contrib.auth.hashers import make_password
 from utils.send_email import send_register_email
@@ -137,9 +137,40 @@ class ModifyPwdView(View):
             return render(request, 'password_reset.html', {'e mail': email, 'modify_form': modify_form})
 
 
-class UserInfoView(LoginRequireMixin,View):
+class UserInfoView(LoginRequireMixin, View):
     """
     用户个人信息
     """
     def get(self, request):
         return render(request, 'usercenter-info.html')
+
+
+class UploadImageView(LoginRequireMixin, View):
+    """
+    用户头像修改
+    上传文件用post方法
+    知识点：admin或者xadmin用form字段未filefield的的时候可以都用户上传的头像做保存，利用这一点来修改头像文件
+"""
+    # 方法１：
+    def post(self, request):
+        # 文件类型，和input传入的值保存在不一样的地方，文件类型在request.FILES里面
+        image_form = UploadImageForm(request.POST, request.FILES)
+        if image_form.is_valid():
+            image = image_form.cleaned_data['image']  # clean_data是is_valid()通过后的键值对，以此来获取image
+            request.user.image = image  #  给user.image赋值
+            request.user.save()  # 保存
+"""
+    # 方法２
+    def post(self, request):
+        # 文件类型，和input类型传入的值保存在不一样的地方，input在request.POST里面，文件类型在request.FILES里面
+        
+        form.ModelForm中独有的instance参数，意思是：例子,实质是一个你将要修改的实例的对象，这里是request.user对象，
+        save()后会直接替换掉原来user.image，因为UploadImageForm中的fields = ['image']
+        
+        image_form = UploadImageForm(request.POST, request.FILES, instance=request.user)
+        if image_form.is_valid():
+            image_form.save()
+            return HttpResponse('successful  !!')
+        else:
+            return HttpResponse('fail to modify image  !!')
+"""""
