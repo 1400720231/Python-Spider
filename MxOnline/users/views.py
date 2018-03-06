@@ -3,18 +3,20 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.backends import ModelBackend
 from .models import UserProfile, EmailVerifyRecord
 from django.db.models import Q
-from .forms import LoginForm, RegisterForm, ForgetForm, ModifyPwdForm, UploadImageForm
+from .forms import LoginForm, RegisterForm, ForgetForm, ModifyPwdForm, UploadImageForm, ModifyPwdForm2
 from django.views.generic import View
 from django.contrib.auth.hashers import make_password
 from utils.send_email import send_register_email
 from utils.mini_utils import LoginRequireMixin
+import json
+
 
 # 登陆视图
 class CustomBackend(ModelBackend):
     # 自定义authenticate方法满足需求
     def authenticate(self, username=None, password=None, **kwargs):
         try:
-            user = UserProfile.objects.get(Q(username=username)|Q(email=username))  # 取出user对象
+            user = UserProfile.objects.get(Q(username=username) |Q(email=username))  # 取出user对象
             if user.check_password(password):  # 因为django存储的密码是密文，不能直接取出password
                 # 所以才用check_password的方法内部检验
                 return user
@@ -56,7 +58,7 @@ class RegisterView(View):
                 # user_profile.set_password(pass_word)  # 保存密码
                 user_profile.password = make_password(pass_word)  # 保存密码和上一行的操作意义一样
                 user_profile.save()  # 这个就很尴尬了，非要加上force_inser=True才能从前端提交保存到数据库
-                #但是我直接在后代文件中写save()就可以保存了，则会是为什么？？？
+                # 但是我直接在后代文件中写save()就可以保存了，则会是为什么？？？
                 # 然后几天之后我直接调用save方法居然又能行了，这是真的尴尬了
                 send_register_email(user_name, 'register')
                 return render(request, "login.html")
@@ -119,6 +121,7 @@ class ResetView(View):
 
 
 class ModifyPwdView(View):
+    """修改密码  """
     def post(self, request):
         modify_form = ModifyPwdForm(request.POST)
         if modify_form.is_valid():
@@ -126,7 +129,7 @@ class ModifyPwdView(View):
             pwd2 = request.POST.get('password2')
             email = request.POST.get('email')
             if pwd1 != pwd2:
-                return render(request, 'password_reset.html', {'mes':'密码不一致'})
+                return render(request, 'password_reset.html', {'mes': '密码不一致'})
             else:
                 user = UserProfile.objects.get(email=email)
                 user.password = make_password(pwd2)
@@ -157,10 +160,10 @@ class UploadImageView(LoginRequireMixin, View):
         image_form = UploadImageForm(request.POST, request.FILES)
         if image_form.is_valid():
             image = image_form.cleaned_data['image']  # clean_data是is_valid()通过后的键值对，以此来获取image
-            request.user.image = image  #  给user.image赋值
+            request.user.image = image  # 给user.image赋值
             request.user.save()  # 保存
 """
-    # 方法２
+    # 方法２（按道理这样是可以的，可是好像保存不到数据库。。。）
     def post(self, request):
         # 文件类型，和input类型传入的值保存在不一样的地方，input在request.POST里面，文件类型在request.FILES里面
         
@@ -173,4 +176,30 @@ class UploadImageView(LoginRequireMixin, View):
             return HttpResponse('successful  !!')
         else:
             return HttpResponse('fail to modify image  !!')
-"""""
+"""
+
+
+class UpdatePwdView(View):
+    """个人中心的更新用户密码， 此时已经登录了"""
+    def get(self, request):
+        modify_form = ModifyPwdForm2()
+        context = {
+            'form': modify_form
+        }
+        return render(request, 'user-info-modify_password.html', context)
+
+    def post(self, request):
+        modify_form = ModifyPwdForm2(request.POST)
+        if modify_form.is_valid():
+            pwd1 = request.POST.get('password1')
+            pwd2 = request.POST.get('password2')
+            if pwd1 != pwd2:
+                return HttpResponse("密码不一致 ！！")
+            else:
+                user = request.user
+                user.set_password(pwd2)
+                user.save()
+                return HttpResponseRedirect(reverse('login'))  # 修改成功后重定向到登录页面
+        else:
+            # 把表单的错误信息传回前端
+            return HttpResponse(json.dumps(modify_form.errors))

@@ -3,7 +3,7 @@
 from django import forms
 from captcha.fields import CaptchaField
 from .models import UserProfile
-
+from django.contrib.auth.forms import UserCreationForm
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True)
@@ -26,6 +26,10 @@ class ModifyPwdForm(forms.Form):
     password1 = forms.CharField(required=True, min_length=5)
     password2 = forms.CharField(required=True, min_length=5)
 
+
+class ModifyPwdForm2(forms.Form):
+    password1 = forms.CharField(required=True, min_length=5, widget=forms.PasswordInput)
+    password2 = forms.CharField(required=True, min_length=5, widget=forms.PasswordInput)
 
 class UploadImageForm(forms.ModelForm):
     class Meta:
