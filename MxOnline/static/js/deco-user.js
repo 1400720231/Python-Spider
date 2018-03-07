@@ -51,7 +51,7 @@ var verify = verifyDialogSubmit(
         type: 'post',
         dataType:'json',
         url:"/users/update_email/ ",
-        data:$('#jsChangeEmailForm').serialize(),
+        data:$('#jsChangeEmailForm').serialize(),  // 序列化
         async: true,
         beforeSend:function(XMLHttpRequest){
             $btn.val("发送中...");
@@ -144,6 +144,8 @@ $(function(){
             {id: '#nick_name', tips: Dml.Msg.epNickName, require: true}
         ]
     );
+
+
     //保存个人资料
     $('#jsEditUserBtn').on('click', function(){
         var _self = $(this),
@@ -170,8 +172,8 @@ $(function(){
             success: function(data) {
                 if(data.nick_name){
                     _showValidateError($('#nick_name'), data.nick_name);
-                }else if(data.birday){
-                   _showValidateError($('#birth_day'), data.birday);
+                }else if(data.birth){
+                   _showValidateError($('#birth_day'), data.birth);
                 }else if(data.address){
                    _showValidateError($('#address'), data.address);
                 }else if(data.status == "failure"){

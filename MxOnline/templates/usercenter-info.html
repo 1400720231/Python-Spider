@@ -45,7 +45,7 @@
                             <i class="error-tips"></i>
                         </li>
 						<li>生&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日：                                           <!--过滤器如果为空 就显示而不是显示none， :和''不能有空格！！！！ -->
-                           <input type="text" id="birth_day" name="birday" value="{{ request.user.birth|default_if_none:'' }}" readonly="readonly"/>
+                           <input type="text" id="birth_day" name="birth" value="{{ request.user.birth|default_if_none:'' }}" readonly="readonly"/>
                             <i class="error-tips"></i>
 						</li>
 						<li>性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别：
@@ -68,7 +68,8 @@
 						</li>
 					</ul>
                     <input type='hidden' name='csrfmiddlewaretoken' value='799Y6iPeEDNSGvrTu3noBrO4MBLv6enY' />
-				</form>
+				{% csrf_token %}
+                </form>
 			</div>
 		</div>
 	</div>

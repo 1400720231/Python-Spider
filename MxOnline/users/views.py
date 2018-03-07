@@ -4,6 +4,7 @@ from django.contrib.auth.backends import ModelBackend
 from .models import UserProfile, EmailVerifyRecord
 from django.db.models import Q
 from .forms import LoginForm, RegisterForm, ForgetForm, ModifyPwdForm, UploadImageForm, ModifyPwdForm2
+from .forms import UserInfoForm
 from django.views.generic import View
 from django.contrib.auth.hashers import make_password
 from utils.send_email import send_register_email
@@ -11,7 +12,7 @@ from utils.mini_utils import LoginRequireMixin
 import json
 
 
-# 登陆视图
+# 登陆视图 ModelBackend这个参数很重要！！！！！！！！记得回来复习
 class CustomBackend(ModelBackend):
     # 自定义authenticate方法满足需求
     def authenticate(self, username=None, password=None, **kwargs):
@@ -147,6 +148,29 @@ class UserInfoView(LoginRequireMixin, View):
     def get(self, request):
         return render(request, 'usercenter-info.html')
 
+    def post(self, request):  # instance是一个已经存在的对象
+        user_info_form = UserInfoForm(request.POST)
+        if user_info_form.is_valid():
+            address = user_info_form.cleaned_data['address']
+            birth = user_info_form.cleaned_data['birth']
+            mobile = user_info_form.cleaned_data['mobile']
+            nick_name = user_info_form.cleaned_data['nick_name']
+            request.user.address = address
+            request.user.birth = birth
+            request.user.mobile = mobile
+            request.user.nick_name = nick_name
+            request.user.save()
+            return HttpResponse('{"status":"success"}', content_type='application/json')
+        else:
+            return HttpResponse(json.dumps(user_info_form.errors), content_type='application/json')
+    # def post(self, request):  # instance是一个已经存在的对象
+    #     user_info_form = UserInfoForm(request.POST, instance=request.user)
+    #     if user_info_form.is_valid():
+    #         user_info_form.save()
+    #         return HttpResponse('{"status":"success"}', content_type='application/json')
+    #     else:
+    #         return HttpResponse(json.dumps(user_info_form.errors), content_type='application/json')
+
 
 class UploadImageView(LoginRequireMixin, View):
     """
@@ -161,7 +185,7 @@ class UploadImageView(LoginRequireMixin, View):
         if image_form.is_valid():
             image = image_form.cleaned_data['image']  # clean_data是is_valid()通过后的键值对，以此来获取image
             request.user.image = image  # 给user.image赋值
-            request.user.save()  # 保存
+            request.user.save()  # request.user保存,如果是instance的话就是image_form.save()
 """
     # 方法２（按道理这样是可以的，可是好像保存不到数据库。。。）
     def post(self, request):
@@ -203,3 +227,35 @@ class UpdatePwdView(View):
         else:
             # 把表单的错误信息传回前端
             return HttpResponse(json.dumps(modify_form.errors))
+
+
+class SendEmailCodeView(LoginRequireMixin, View):
+    """
+    发送邮箱验证码, 前提是登录条件下
+    """
+    def get(self, request):
+        email = request.GET.get('email', '')  # 没有默认为空
+        if UserProfile.objects.filter(email=email):
+            return HttpResponse('{"email":"邮箱已经存在"}', content_type='application/json')
+        send_register_email(email, "update_email")
+        return HttpResponse('{"status":"success"}', content_type='application/json')
+
+
+class UpdateEmailView(View):
+    """
+    修改email
+    用到了两个view，一个发送邮件，然后用ajax访问第二个view验证验证码的正确性来修改数据库
+    用ajax的好处就是不用跳转页面，的确用户体验会好一点，
+
+    """
+    def post(self, request):
+        email = request.POST.get('email', '')
+        code = request.POST.get('code', '')
+        existed_records = EmailVerifyRecord.objects.filter(email=email, code=code, send_type='update_email')
+        if existed_records:
+            user = request.user
+            user.email = email
+            user.save()
+            return HttpResponseRedirect(reverse('users:update_email'))
+        else:
+            return HttpResponse('{"email": "验证码出错"}', content_type='application/json')
