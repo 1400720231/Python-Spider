@@ -1,4 +1,4 @@
-# 用session　获取token值，构建表单登录github#
+###用session　获取token值，构建表单登录github
 
 
 ----------
@@ -13,7 +13,7 @@
 
 
 ###1、打开github登录页面，输入一个错的账号密码，发现表单数据为下面这样
-![这里写图片描述](https://img-blog.csdn.net/20180407003046353?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L21pbmlfcGFuZGE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
 ###也就是说我们需要post过去的数据为这样子的：
 
 ```
@@ -25,8 +25,7 @@ data = {
 		'utf8':'✓'
 	}
 ```
-###观察登录页面的html找到这个值的出处：
-![这里写图片描述](https://img-blog.csdn.net/20180407003341478?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L21pbmlfcGFuZGE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
 ###２、所以思路是，先获取这个值，然后再把这个数据填充到data数据中，再去post登录
 ####　　获取这个token的值：
 
@@ -85,8 +84,7 @@ for i in a.find_all('span',{'class':'text-bold repo'}):  #匹配我的仓库名�
 # ArticleSpider
 # Python_Codes
 ```
-###＼４、结果对比：
-![这里写图片描述](https://img-blog.csdn.net/20180407004211901?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L21pbmlfcGFuZGE=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
 
 
 
