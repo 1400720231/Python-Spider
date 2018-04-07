@@ -16,8 +16,8 @@ if len(href_tagert)==0:
 	data = {
 	'source':'movie',
 	'redir':'https://movie.douban.com/',
-	'form_email': '18778331181',
-	'form_password': '250onion????',
+	'form_email': '你的帐号',
+	'form_password': '你的密码',
 	'login':'登录'}
 else:
 	solution_href = href_tagert[0]['src']
